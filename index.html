@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bienvenida — TI e Innovación · V&C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* =======================================================================
+     Paleta de marca V&C
+     ===================================================================== */
+  :root{
+    --ink:#282828;        /* gris carbón de la empresa */
+    --ink-deep:#1c1c1c;   /* carbón más profundo para capas */
+    --paper:#ffffff;
+    --signal:#ECD925;     /* amarillo señal (el acento) */
+    --ink-soft:#6b6b68;   /* texto secundario */
+    --hair:#e4e4e1;       /* líneas finas */
+    --hair-dark:#3a3a3a;  /* líneas finas sobre carbón */
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  html,body{height:100%;overflow:hidden;background:var(--ink);}
+
+  body{
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Escenario ---------------------------------------------------------- */
+  .deck{position:fixed;inset:0;}
+
+  .slide{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:clamp(2rem,6vw,7rem);
+    opacity:0;visibility:hidden;
+    transform:translateX(40px);
+    transition:opacity .5s ease, transform .5s ease, visibility .5s;
+    overflow-y:auto;
+  }
+  .slide.active{opacity:1;visibility:visible;transform:none;}
+  .slide.past{transform:translateX(-40px);}
+
+  .slide.dark{background:var(--ink);color:var(--paper);}
+  .slide.light{background:var(--paper);color:var(--ink);}
+
+  .wrap{width:100%;max-width:920px;margin:0 auto;}
+
+  /* La firma amarilla: barra corta y gruesa que ancla cada slide -------- */
+  .keyline{width:64px;height:10px;background:var(--signal);border-radius:2px;margin-bottom:2rem;}
+
+  /* Tipografía --------------------------------------------------------- */
+  .eyebrow{font-size:.9rem;font-weight:600;color:var(--signal);margin-bottom:1.25rem;letter-spacing:.01em;}
+  .slide.light .eyebrow{color:#8a7d00;}
+
+  h1{
+    font-weight:800;
+    font-size:clamp(2.6rem,8vw,5.4rem);
+    line-height:1.02;
+    letter-spacing:-.03em;
+  }
+  h1 .name{color:var(--signal);display:block;}
+
+  h2{
+    font-weight:700;
+    font-size:clamp(1.9rem,4.5vw,3rem);
+    line-height:1.08;
+    letter-spacing:-.02em;
+    margin-bottom:1.5rem;
+  }
+
+  p.lead{
+    font-size:clamp(1.05rem,2vw,1.3rem);
+    font-weight:400;line-height:1.6;
+    max-width:60ch;color:inherit;
+  }
+  .slide.light p.lead{color:#3d3d3a;}
+  .slide.dark  p.lead{color:#d8d8d4;}
+
+  .hero-sub{
+    margin-top:2.25rem;font-size:1.05rem;font-weight:500;color:#cfcfca;
+  }
+  .hint{
+    position:absolute;bottom:clamp(1.5rem,4vw,3rem);left:clamp(2rem,6vw,7rem);
+    font-size:.85rem;color:#8a8a86;font-weight:500;
+  }
+
+  /* Qué hemos hecho: tres bloques temáticos ---------------------------- */
+  .work-grid{
+    margin-top:1.5rem;
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:clamp(1.5rem,3vw,2.75rem);
+  }
+  .work-col .cbar{width:40px;height:6px;background:var(--signal);border-radius:2px;margin-bottom:1rem;}
+  .work-col h3{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin-bottom:1.1rem;}
+  .work-col ul{list-style:none;display:flex;flex-direction:column;gap:.75rem;}
+  .work-col li{
+    font-size:1rem;line-height:1.4;color:#3d3d3a;
+    padding-left:1.05rem;position:relative;
+  }
+  .work-col li::before{
+    content:"";position:absolute;left:0;top:.55em;
+    width:5px;height:5px;background:var(--signal);border-radius:50%;
+  }
+  .work-col li b{color:var(--ink);font-weight:600;}
+
+  /* Equipo ------------------------------------------------------------- */
+  .team{
+    margin-top:1.25rem;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:1px;background:var(--hair);border:1px solid var(--hair);
+  }
+  .member{background:var(--paper);padding:1.4rem 1.5rem;}
+  .member .mname{font-weight:700;font-size:1.2rem;letter-spacing:-.01em;}
+  .member .mrole{color:var(--ink-soft);font-size:.95rem;margin-top:.35rem;line-height:1.4;}
+  .member .midx{font-size:.8rem;font-weight:700;color:#b3a400;margin-bottom:.6rem;}
+
+  /* Cierre ------------------------------------------------------------- */
+  .close-cta{
+    margin-top:2.5rem;display:inline-block;
+    background:var(--signal);color:var(--ink);
+    font-weight:700;font-size:1.05rem;
+    padding:.9rem 1.6rem;border-radius:4px;
+  }
+
+  /* Navegación --------------------------------------------------------- */
+  .nav{
+    position:fixed;bottom:clamp(1.5rem,4vw,3rem);right:clamp(2rem,6vw,7rem);
+    display:flex;align-items:center;gap:1.25rem;z-index:20;
+  }
+  .counter{font-size:.9rem;font-weight:700;color:#8a8a86;letter-spacing:.02em;}
+  .arrows{display:flex;gap:.5rem;}
+  .arrow{
+    width:44px;height:44px;border:1px solid var(--hair-dark);background:transparent;
+    color:#cfcfca;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+    transition:background .2s,color .2s,border-color .2s;
+  }
+  .arrow:hover{background:var(--signal);color:var(--ink);border-color:var(--signal);}
+  .arrow:focus-visible{outline:3px solid var(--signal);outline-offset:2px;}
+  .arrow:disabled{opacity:.3;cursor:default;}
+  .arrow:disabled:hover{background:transparent;color:#cfcfca;border-color:var(--hair-dark);}
+
+  .dots{position:fixed;bottom:clamp(1.5rem,4vw,3rem);left:50%;transform:translateX(-50%);
+    display:flex;gap:.6rem;z-index:20;}
+  .dots button{
+    width:9px;height:9px;border-radius:50%;border:none;padding:0;cursor:pointer;
+    background:#6b6b68;opacity:.5;transition:opacity .2s,background .2s,width .2s;
+  }
+  .dots button.on{background:var(--signal);opacity:1;width:26px;border-radius:5px;}
+  .dots button:focus-visible{outline:2px solid var(--signal);outline-offset:3px;}
+
+  @media (max-width:760px){
+    .work-grid{grid-template-columns:1fr;gap:1.75rem;}
+  }
+  @media (max-width:640px){
+    .nav{right:1.25rem;bottom:1.25rem;}
+    .hint{left:1.5rem;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .slide{transition:opacity .2s ease;transform:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck"></div>
+
+<div class="dots" id="dots" role="tablist" aria-label="Ir a diapositiva"></div>
+<div class="nav">
+  <span class="counter" id="counter">01 / 05</span>
+  <div class="arrows">
+    <button class="arrow" id="prev" aria-label="Anterior">&larr;</button>
+    <button class="arrow" id="next" aria-label="Siguiente">&rarr;</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   ▸ EDITA AQUÍ — todo lo personalizable vive en este bloque
+   ========================================================================= */
+const CONFIG = {
+  nuevoIntegrante: "[Nombre del nuevo integrante]",  // ← cámbialo por el nombre real
+  nombreEquipo: "Equipo de TI e Innovación",
+  empresa: "Verificación y Control UVA",
+
+  // Lo que hemos construido, agrupado en tres bloques.
+  // Puedes usar <b>...</b> para resaltar el nombre del cliente o del sistema.
+  trabajo: [
+    { grupo:"Proyectos para clientes", items:[
+        "<b>Decathlon:</b> escaneo y tipos de procesos",
+        "<b>ULTA:</b> tablas de relación, bases de etiquetado y escaneo",
+    ]},
+    { grupo:"Sistemas internos V&C", items:[
+        "SEA",
+        "Sistema de emisión de etiquetado",
+        "Sistema de fiabilidad — evaluaciones técnicas y exámenes de calibración",
+        "Sistema de asignaciones multibrand",
+    ]},
+    { grupo:"Escaneo e inteligencia artificial", items:[
+        "Aplicación de escaneo de imágenes",
+        "Evaluación de etiquetas con IA",
+    ]},
+  ],
+
+  // El equipo. Agrega tantos integrantes como necesites.
+  equipo: [
+    { nombre:"[Tu nombre]",       rol:"Ejecutivo de Innovación" },
+    { nombre:"[Integrante 2]",    rol:"[Rol]" },
+    { nombre:"[Integrante 3]",    rol:"[Rol]" },
+  ],
+
+  // Cierre
+  dondeEncontrarnos: "Nos encuentras en el área de Innovación. Cualquier cosa que necesites automatizar o resolver con una herramienta, con nosotros.",
+};
+/* ===================== fin de la zona editable ========================= */
+
+
+/* --- Generación de las diapositivas (no necesitas tocar esto) ---------- */
+const workHTML = CONFIG.trabajo.map(g =>
+  `<div class="work-col">
+     <div class="cbar"></div>
+     <h3>${g.grupo}</h3>
+     <ul>${g.items.map(it=>`<li>${it}</li>`).join("")}</ul>
+   </div>`).join("");
+
+const teamHTML = CONFIG.equipo.map((m,i) =>
+  `<div class="member">
+     <div class="midx">${String(i+1).padStart(2,"0")}</div>
+     <div class="mname">${m.nombre}</div>
+     <div class="mrole">${m.rol}</div>
+   </div>`).join("");
+
+const slides = [
+  // 1 · Bienvenida
+  `<div class="wrap">
+     <div class="keyline"></div>
+     <div class="eyebrow">${CONFIG.nombreEquipo} · ${CONFIG.empresa}</div>
+     <h1>Bienvenido,<span class="name">${CONFIG.nuevoIntegrante}</span></h1>
+     <p class="hero-sub">Somos el equipo que hace que las cosas funcionen por dentro.</p>
+   </div>
+   <div class="hint">Usa las flechas &larr; &rarr; para avanzar</div>`,
+
+  // 2 · Quiénes somos
+  `<div class="wrap">
+     <div class="keyline"></div>
+     <div class="eyebrow">Quiénes somos</div>
+     <h2>El motor detrás de la operación.</h2>
+     <p class="lead">Somos el ${CONFIG.nombreEquipo.replace(/^Equipo de /,"equipo de ")} de ${CONFIG.empresa}. Convertimos trámites manuales en sistemas: menos captura a mano, menos errores y más tiempo para lo que importa. Somos pocos, pero movemos mucho.</p>
+   </div>`,
+
+  // 3 · Qué hemos hecho
+  `<div class="wrap">
+     <div class="keyline"></div>
+     <div class="eyebrow">Qué hemos hecho</div>
+     <h2>Un poco de lo que hemos construido.</h2>
+     <div class="work-grid">${workHTML}</div>
+   </div>`,
+
+  // 4 · El equipo
+  `<div class="wrap">
+     <div class="keyline"></div>
+     <div class="eyebrow">El equipo</div>
+     <h2>Con quiénes vas a trabajar.</h2>
+     <div class="team">${teamHTML}</div>
+   </div>`,
+
+  // 5 · Cierre
+  `<div class="wrap">
+     <div class="keyline"></div>
+     <div class="eyebrow">Aquí estamos</div>
+     <h2>Bienvenido al equipo.</h2>
+     <p class="lead">${CONFIG.dondeEncontrarnos}</p>
+     <span class="close-cta">Vamos a construir cosas buenas.</span>
+   </div>`,
+];
+
+const themes = ["dark","light","light","light","dark"];
+
+const deck = document.getElementById("deck");
+deck.innerHTML = slides.map((html,i) =>
+  `<section class="slide ${themes[i]}" data-i="${i}">${html}</section>`).join("");
+
+const sections = [...deck.querySelectorAll(".slide")];
+const dotsBox = document.getElementById("dots");
+dotsBox.innerHTML = sections.map((_,i)=>`<button role="tab" aria-label="Diapositiva ${i+1}"></button>`).join("");
+const dots = [...dotsBox.querySelectorAll("button")];
+const counter = document.getElementById("counter");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+
+let cur = 0;
+function show(n){
+  cur = Math.max(0, Math.min(slides.length-1, n));
+  sections.forEach((s,i)=>{
+    s.classList.toggle("active", i===cur);
+    s.classList.toggle("past", i<cur);
+  });
+  dots.forEach((d,i)=>d.classList.toggle("on", i===cur));
+  counter.textContent = String(cur+1).padStart(2,"0")+" / "+String(slides.length).padStart(2,"0");
+  prevBtn.disabled = cur===0;
+  nextBtn.disabled = cur===slides.length-1;
+}
+show(0);
+
+nextBtn.onclick = ()=>show(cur+1);
+prevBtn.onclick = ()=>show(cur-1);
+dots.forEach((d,i)=>d.onclick=()=>show(i));
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();show(cur+1);}
+  if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();show(cur-1);}
+  if(e.key==="Home"){show(0);}
+  if(e.key==="End"){show(slides.length-1);}
+});
+
+// Swipe en móvil / clic en mitades de pantalla
+let x0=null;
+deck.addEventListener("touchstart",e=>x0=e.touches[0].clientX,{passive:true});
+deck.addEventListener("touchend",e=>{
+  if(x0===null)return;
+  const dx=e.changedTouches[0].clientX-x0;
+  if(Math.abs(dx)>50) dx<0?show(cur+1):show(cur-1);
+  x0=null;
+});
+</script>
+</body>
+</html>
