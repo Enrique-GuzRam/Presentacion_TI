@@ -156,6 +156,23 @@
       }
     }
 
+    @keyframes logoPop {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(.8);
+      }
+
+      65% {
+        opacity: 1;
+        transform: translateY(-4px) scale(1.08);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
     @keyframes shimmer {
       to {
         background-position: -200% center;
@@ -665,32 +682,45 @@
       border-color: var(--hair-dark);
     }
 
-    /* Equipo ------------------------------------------------------------- */
-    .team {
-      margin-top: 1.25rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    /* Clientes ------------------------------------------------------------- */
+    .clients {
+      margin-top: 1.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 1.1rem;
     }
 
-    .member {
+    .client-card {
       position: relative;
       overflow: hidden;
+      flex: 0 1 160px;
       background: var(--paper);
       border: 1px solid var(--hair);
       border-radius: 14px;
-      padding: 1.6rem 1.6rem 1.8rem;
+      padding: 1.5rem 1.25rem;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
       transition: transform .12s ease-out, box-shadow .3s ease, border-color .3s ease;
       transform-style: preserve-3d;
       will-change: transform;
     }
 
-    .member:hover {
+    /* Entrada escalonada: cada logo aparece uno por uno al activarse la diapositiva */
+    .slide.active .clients .client-card {
+      animation: logoPop .7s cubic-bezier(.22, 1.4, .36, 1) both;
+      animation-delay: calc(var(--i, 0) * .16s + .5s);
+    }
+
+    .client-card:hover {
       box-shadow: 0 22px 48px -24px rgba(0, 0, 0, .32);
       border-color: #ded7a0;
     }
 
-    .member::after {
+    .client-card::after {
       content: "";
       position: absolute;
       inset: 0;
@@ -700,36 +730,24 @@
       background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(236, 217, 37, .18), transparent 60%);
     }
 
-    .member:hover::after {
+    .client-card:hover::after {
       opacity: 1;
     }
 
-    .avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--signal), var(--signal-soft));
-      color: var(--ink);
-      font-weight: 800;
-      font-size: 1.02rem;
-      letter-spacing: .02em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.1rem;
+    .client-logo {
+      max-width: 100%;
+      max-height: 40px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      filter: grayscale(1);
+      opacity: .7;
+      transition: filter .35s ease, opacity .35s ease;
     }
 
-    .member .mname {
-      font-weight: 700;
-      font-size: 1.15rem;
-      letter-spacing: -.01em;
-    }
-
-    .member .mrole {
-      color: var(--ink-soft);
-      font-size: .94rem;
-      margin-top: .35rem;
-      line-height: 1.4;
+    .client-card:hover .client-logo {
+      filter: grayscale(0);
+      opacity: 1;
     }
 
     /* Cierre ------------------------------------------------------------- */
@@ -973,8 +991,12 @@
       }
 
       .close-cta:hover,
-      .member:hover {
+      .client-card:hover {
         transform: none !important;
+      }
+
+      .client-card {
+        opacity: 1 !important;
       }
     }
   </style>
@@ -1102,11 +1124,13 @@
         ],
       },
 
-      // El equipo. Agrega tantos integrantes como necesites.
-      equipo: [
-        { nombre: "[Tu nombre]", rol: "Ejecutivo de Innovación" },
-        { nombre: "[Integrante 2]", rol: "[Rol]" },
-        { nombre: "[Integrante 3]", rol: "[Rol]" },
+      // Clientes que ya confían en nosotros. Agrega tantos logos como necesites.
+      clientes: [
+        { nombre: "Grupo Axo", logo: "resources/img/logo_01.png" },
+        { nombre: "Decathlon", logo: "resources/img/logo_02.png" },
+        { nombre: "Bosch", logo: "resources/img/logo_03.png" },
+        { nombre: "Ferragamo", logo: "resources/img/logo_06.png" },
+        { nombre: "Unilever", logo: "resources/img/logo_18.png" },
       ],
 
       // Cierre
@@ -1116,13 +1140,6 @@
 
 
     /* --- Generación de las diapositivas (no necesitas tocar esto) ---------- */
-    function initials(name) {
-      const clean = name.replace(/[\[\]]/g, "").trim();
-      const parts = clean.split(/\s+/).filter(Boolean);
-      if (!parts.length) return "?";
-      return parts.slice(0, 2).map(p => p[0].toUpperCase()).join("");
-    }
-
     const timelineHTML = CONFIG.origen.herramientas.map((h, i) =>
       `<div class="tlh-item" style="--i:${i}">
      <div class="tl-dot"><svg><use href="#i-${h.icon}" xlink:href="#i-${h.icon}"></use></svg></div>
@@ -1132,11 +1149,9 @@
      </div>
    </div>`).join("");
 
-    const teamHTML = CONFIG.equipo.map((m) =>
-      `<div class="member">
-     <div class="avatar">${initials(m.nombre)}</div>
-     <div class="mname">${m.nombre}</div>
-     <div class="mrole">${m.rol}</div>
+    const clientsHTML = CONFIG.clientes.map((c, i) =>
+      `<div class="client-card" style="--i:${i}">
+     <img class="client-logo" src="${c.logo}" alt="${c.nombre}" loading="lazy">
    </div>`).join("");
 
     const meshBig = `<div class="mesh-layer" aria-hidden="true">
@@ -1195,13 +1210,13 @@
      </div>
    </div>`,
 
-      // 4 · El equipo
+      // 4 · Clientes
       `${meshLight}
    <div class="wrap">
      <div class="keyline"></div>
-     <div class="eyebrow">El equipo</div>
-     <h2>Detrás de cada herramienta, un equipo real.</h2>
-     <div class="team">${teamHTML}</div>
+     <div class="eyebrow">Nuestros clientes</div>
+     <h2>Algunas cuentas que hemos apoyado.</h2>
+     <div class="clients">${clientsHTML}</div>
    </div>`,
 
       // 5 · Cierre
@@ -1326,7 +1341,7 @@
       });
       el.addEventListener("mouseleave", () => { el.style.transform = ""; });
     }
-    deck.querySelectorAll(".member").forEach(attachTilt);
+    deck.querySelectorAll(".client-card").forEach(attachTilt);
 
     /* --- Línea de tiempo horizontal: botones, rueda, arrastre y autoscroll -- */
     const tlViewport = document.getElementById("tlViewport");
