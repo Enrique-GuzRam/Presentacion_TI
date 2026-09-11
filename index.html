@@ -1,348 +1,1576 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bienvenida — TI e Innovación · V&C</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  /* =======================================================================
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenida — TI e Innovación · V&amp;C</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    /* =======================================================================
      Paleta de marca V&C
      ===================================================================== */
-  :root{
-    --ink:#282828;        /* gris carbón de la empresa */
-    --ink-deep:#1c1c1c;   /* carbón más profundo para capas */
-    --paper:#ffffff;
-    --signal:#ECD925;     /* amarillo señal (el acento) */
-    --ink-soft:#6b6b68;   /* texto secundario */
-    --hair:#e4e4e1;       /* líneas finas */
-    --hair-dark:#3a3a3a;  /* líneas finas sobre carbón */
-    font-family:'Inter',system-ui,-apple-system,sans-serif;
-  }
+    :root {
+      --ink: #282828;
+      /* gris carbón de la empresa */
+      --ink-deep: #1c1c1c;
+      /* carbón más profundo para capas */
+      --paper: #ffffff;
+      --signal: #ECD925;
+      /* amarillo señal (el acento) */
+      --signal-soft: #fff3a0;
+      --glow: 236, 217, 37;
+      /* --signal en canales rgb, para rgba() */
+      --ink-soft: #6b6b68;
+      /* texto secundario */
+      --hair: #e4e4e1;
+      /* líneas finas */
+      --hair-dark: #3a3a3a;
+      /* líneas finas sobre carbón */
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
 
-  *{margin:0;padding:0;box-sizing:border-box}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-  html,body{height:100%;overflow:hidden;background:var(--ink);}
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--ink);
+    }
 
-  body{
-    color:var(--ink);
-    -webkit-font-smoothing:antialiased;
-  }
+    body {
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
 
-  /* Escenario ---------------------------------------------------------- */
-  .deck{position:fixed;inset:0;}
+    /* Escenario ---------------------------------------------------------- */
+    .deck {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
 
-  .slide{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;justify-content:center;
-    padding:clamp(2rem,6vw,7rem);
-    opacity:0;visibility:hidden;
-    transform:translateX(40px);
-    transition:opacity .5s ease, transform .5s ease, visibility .5s;
-    overflow-y:auto;
-  }
-  .slide.active{opacity:1;visibility:visible;transform:none;}
-  .slide.past{transform:translateX(-40px);}
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(2rem, 6vw, 7rem);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(30px) scale(.97);
+      filter: blur(6px);
+      transition: opacity .6s cubic-bezier(.16, 1, .3, 1), transform .6s cubic-bezier(.16, 1, .3, 1), filter .6s ease, visibility .6s;
+      overflow-y: auto;
+    }
 
-  .slide.dark{background:var(--ink);color:var(--paper);}
-  .slide.light{background:var(--paper);color:var(--ink);}
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      filter: blur(0);
+    }
 
-  .wrap{width:100%;max-width:920px;margin:0 auto;}
+    .slide.past {
+      transform: translateY(-30px) scale(.97);
+      filter: blur(6px);
+    }
 
-  /* La firma amarilla: barra corta y gruesa que ancla cada slide -------- */
-  .keyline{width:64px;height:10px;background:var(--signal);border-radius:2px;margin-bottom:2rem;}
+    .slide.dark {
+      background: var(--ink);
+      color: var(--paper);
+    }
 
-  /* Tipografía --------------------------------------------------------- */
-  .eyebrow{font-size:.9rem;font-weight:600;color:var(--signal);margin-bottom:1.25rem;letter-spacing:.01em;}
-  .slide.light .eyebrow{color:#8a7d00;}
+    .slide.light {
+      background: var(--paper);
+      color: var(--ink);
+    }
 
-  h1{
-    font-weight:800;
-    font-size:clamp(2.6rem,8vw,5.4rem);
-    line-height:1.02;
-    letter-spacing:-.03em;
-  }
-  h1 .name{color:var(--signal);display:block;}
+    .wrap {
+      width: 100%;
+      max-width: 920px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
 
-  h2{
-    font-weight:700;
-    font-size:clamp(1.9rem,4.5vw,3rem);
-    line-height:1.08;
-    letter-spacing:-.02em;
-    margin-bottom:1.5rem;
-  }
+    /* Entrada escalonada de cada bloque dentro de la diapositiva activa --- */
+    .slide.active .wrap>* {
+      animation: fadeUp .7s cubic-bezier(.16, 1, .3, 1) both;
+    }
 
-  p.lead{
-    font-size:clamp(1.05rem,2vw,1.3rem);
-    font-weight:400;line-height:1.6;
-    max-width:60ch;color:inherit;
-  }
-  .slide.light p.lead{color:#3d3d3a;}
-  .slide.dark  p.lead{color:#d8d8d4;}
+    .slide.active .wrap>*:nth-child(1) {
+      animation-delay: .05s
+    }
 
-  .hero-sub{
-    margin-top:2.25rem;font-size:1.05rem;font-weight:500;color:#cfcfca;
-  }
-  .hint{
-    position:absolute;bottom:clamp(1.5rem,4vw,3rem);left:clamp(2rem,6vw,7rem);
-    font-size:.85rem;color:#8a8a86;font-weight:500;
-  }
+    .slide.active .wrap>*:nth-child(2) {
+      animation-delay: .12s
+    }
 
-  /* Logo de marca -------------------------------------------------------- */
-  .brand{
-    position:fixed;top:clamp(1.5rem,4vw,3rem);right:clamp(2rem,6vw,7rem);
-    z-index:20;
-  }
-  .brand img{height:52px;width:auto;display:block;}
+    .slide.active .wrap>*:nth-child(3) {
+      animation-delay: .19s
+    }
 
-  /* Qué hemos hecho: tres bloques temáticos ---------------------------- */
-  .work-grid{
-    margin-top:1.5rem;
-    display:grid;grid-template-columns:repeat(3,1fr);
-    gap:clamp(1.5rem,3vw,2.75rem);
-  }
-  .work-col .cbar{width:40px;height:6px;background:var(--signal);border-radius:2px;margin-bottom:1rem;}
-  .work-col h3{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin-bottom:1.1rem;}
-  .work-col ul{list-style:none;display:flex;flex-direction:column;gap:.75rem;}
-  .work-col li{
-    font-size:1rem;line-height:1.4;color:#3d3d3a;
-    padding-left:1.05rem;position:relative;
-  }
-  .work-col li::before{
-    content:"";position:absolute;left:0;top:.55em;
-    width:5px;height:5px;background:var(--signal);border-radius:50%;
-  }
-  .work-col li b{color:var(--ink);font-weight:600;}
+    .slide.active .wrap>*:nth-child(4) {
+      animation-delay: .26s
+    }
 
-  /* Equipo ------------------------------------------------------------- */
-  .team{
-    margin-top:1.25rem;
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:1px;background:var(--hair);border:1px solid var(--hair);
-  }
-  .member{background:var(--paper);padding:1.4rem 1.5rem;}
-  .member .mname{font-weight:700;font-size:1.2rem;letter-spacing:-.01em;}
-  .member .mrole{color:var(--ink-soft);font-size:.95rem;margin-top:.35rem;line-height:1.4;}
-  .member .midx{font-size:.8rem;font-weight:700;color:#b3a400;margin-bottom:.6rem;}
+    .slide.active .wrap>*:nth-child(5) {
+      animation-delay: .33s
+    }
 
-  /* Cierre ------------------------------------------------------------- */
-  .close-cta{
-    margin-top:2.5rem;display:inline-block;
-    background:var(--signal);color:var(--ink);
-    font-weight:700;font-size:1.05rem;
-    padding:.9rem 1.6rem;border-radius:4px;
-  }
+    .slide.active .wrap>*:nth-child(6) {
+      animation-delay: .40s
+    }
 
-  /* Navegación --------------------------------------------------------- */
-  .nav{
-    position:fixed;bottom:clamp(1.5rem,4vw,3rem);right:clamp(2rem,6vw,7rem);
-    display:flex;align-items:center;gap:1.25rem;z-index:20;
-  }
-  .counter{font-size:.9rem;font-weight:700;color:#8a8a86;letter-spacing:.02em;}
-  .arrows{display:flex;gap:.5rem;}
-  .arrow{
-    width:44px;height:44px;border:1px solid var(--hair-dark);background:transparent;
-    color:#cfcfca;border-radius:50%;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-    transition:background .2s,color .2s,border-color .2s;
-  }
-  .arrow:hover{background:var(--signal);color:var(--ink);border-color:var(--signal);}
-  .arrow:focus-visible{outline:3px solid var(--signal);outline-offset:2px;}
-  .arrow:disabled{opacity:.3;cursor:default;}
-  .arrow:disabled:hover{background:transparent;color:#cfcfca;border-color:var(--hair-dark);}
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
 
-  .dots{position:fixed;bottom:clamp(1.5rem,4vw,3rem);left:50%;transform:translateX(-50%);
-    display:flex;gap:.6rem;z-index:20;}
-  .dots button{
-    width:9px;height:9px;border-radius:50%;border:none;padding:0;cursor:pointer;
-    background:#6b6b68;opacity:.5;transition:opacity .2s,background .2s,width .2s;
-  }
-  .dots button.on{background:var(--signal);opacity:1;width:26px;border-radius:5px;}
-  .dots button:focus-visible{outline:2px solid var(--signal);outline-offset:3px;}
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-  @media (max-width:760px){
-    .work-grid{grid-template-columns:1fr;gap:1.75rem;}
-  }
-  @media (max-width:640px){
-    .nav{right:1.25rem;bottom:1.25rem;}
-    .hint{left:1.5rem;}
-    .brand{right:1.25rem;top:1.25rem;}
-    .brand img{height:36px;}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .slide{transition:opacity .2s ease;transform:none!important;}
-  }
-</style>
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% center;
+      }
+    }
+
+    @keyframes driftA {
+      0% {
+        transform: translate(-6%, -4%) scale(1);
+      }
+
+      50% {
+        transform: translate(4%, 6%) scale(1.15);
+      }
+
+      100% {
+        transform: translate(-6%, -4%) scale(1);
+      }
+    }
+
+    @keyframes driftB {
+      0% {
+        transform: translate(5%, 4%) scale(1);
+      }
+
+      50% {
+        transform: translate(-6%, -6%) scale(1.1);
+      }
+
+      100% {
+        transform: translate(5%, 4%) scale(1);
+      }
+    }
+
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(var(--glow), .5);
+      }
+
+      50% {
+        box-shadow: 0 0 20px 4px rgba(var(--glow), .35);
+      }
+    }
+
+    @keyframes floatY {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    @keyframes confettiPop {
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--r)) scale(.6);
+        opacity: 0;
+      }
+    }
+
+    /* Fondo animado (solo diapositivas oscuras) --------------------------- */
+    .mesh-layer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+    }
+
+    .b1 {
+      width: 46vw;
+      height: 46vw;
+      max-width: 560px;
+      max-height: 560px;
+      left: -12%;
+      top: -16%;
+      background: radial-gradient(circle, rgba(236, 217, 37, .55), rgba(236, 217, 37, 0) 70%);
+      animation: driftA 22s ease-in-out infinite;
+    }
+
+    .b2 {
+      width: 38vw;
+      height: 38vw;
+      max-width: 480px;
+      max-height: 480px;
+      right: -10%;
+      bottom: -14%;
+      background: radial-gradient(circle, rgba(255, 243, 160, .32), rgba(255, 243, 160, 0) 70%);
+      animation: driftB 26s ease-in-out infinite;
+    }
+
+    .mesh-layer canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .watermark {
+      position: absolute;
+      right: -4%;
+      bottom: -8%;
+      width: 46%;
+      max-width: 520px;
+      opacity: .05;
+      user-select: none;
+    }
+
+    /* Variante clara del fondo: mismo lenguaje visual, mucho más sutil ----- */
+    .mesh-layer.light .b1 {
+      background: radial-gradient(circle, rgba(236, 217, 37, .24), rgba(236, 217, 37, 0) 70%);
+    }
+
+    .mesh-layer.light .b2 {
+      background: radial-gradient(circle, rgba(255, 205, 60, .16), rgba(255, 205, 60, 0) 70%);
+    }
+
+    .mesh-layer.light .watermark {
+      opacity: .04;
+    }
+
+    .deco-icon {
+      position: absolute;
+      right: -6%;
+      top: 50%;
+      width: min(46vw, 520px);
+      height: min(46vw, 520px);
+      color: var(--ink);
+      opacity: .05;
+      transform: translateY(-50%);
+      animation: spinSlow 60s linear infinite;
+    }
+
+    @keyframes spinSlow {
+      from {
+        transform: translateY(-50%) rotate(0deg);
+      }
+
+      to {
+        transform: translateY(-50%) rotate(360deg);
+      }
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      opacity: .035;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+
+    .spotlight {
+      position: fixed;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+      background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 50%), rgba(236, 217, 37, .16), transparent 60%);
+      opacity: 0;
+      transition: opacity .5s ease;
+    }
+
+    body.theme-dark .spotlight {
+      opacity: 1;
+    }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      z-index: 30;
+      background: linear-gradient(90deg, var(--signal), var(--signal-soft));
+      transition: width .5s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    /* La firma amarilla: barra corta y gruesa que ancla cada slide -------- */
+    .keyline {
+      width: 64px;
+      height: 10px;
+      background: var(--signal);
+      border-radius: 2px;
+      margin-bottom: 2rem;
+    }
+
+    .keyline.glow {
+      animation: pulseGlow 2.6s ease-in-out infinite;
+    }
+
+    /* Tipografía --------------------------------------------------------- */
+    .eyebrow {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--signal);
+      margin-bottom: 1.25rem;
+      letter-spacing: .01em;
+    }
+
+    .slide.light .eyebrow {
+      color: #8a7d00;
+    }
+
+    h1 {
+      font-weight: 800;
+      font-size: clamp(2.6rem, 8vw, 5.4rem);
+      line-height: 1.02;
+      letter-spacing: -.03em;
+    }
+
+    h1 .name {
+      display: block;
+      background: linear-gradient(90deg, var(--signal), var(--signal-soft), var(--signal));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 5s linear infinite;
+    }
+
+    h2 {
+      font-weight: 700;
+      font-size: clamp(1.9rem, 4.5vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      margin-bottom: 1.5rem;
+    }
+
+    p.lead {
+      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      font-weight: 400;
+      line-height: 1.6;
+      max-width: 60ch;
+      color: inherit;
+    }
+
+    .slide.light p.lead {
+      color: #3d3d3a;
+    }
+
+    .slide.dark p.lead {
+      color: #d8d8d4;
+    }
+
+    .lead strong {
+      color: var(--signal);
+      font-weight: 700;
+    }
+
+    /* Versión compacta de encabezado/párrafo, para cuando otro elemento (como
+       la línea de tiempo) debe ser el protagonista visual de la diapositiva */
+    .h2-tight {
+      font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+      margin-bottom: .9rem;
+    }
+
+    .lead-tight {
+      font-size: clamp(.88rem, 1.3vw, 1rem);
+    }
+
+    .hero-sub {
+      margin-top: 2.25rem;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #cfcfca;
+    }
+
+    .hint {
+      position: absolute;
+      bottom: clamp(1.5rem, 4vw, 3rem);
+      left: clamp(2rem, 6vw, 7rem);
+      font-size: .85rem;
+      color: #8a8a86;
+      font-weight: 500;
+      transition: color .3s ease;
+    }
+
+    body.theme-light .hint {
+      color: #a39d8f;
+    }
+
+    /* Logo de marca -------------------------------------------------------- */
+    .brand {
+      position: fixed;
+      top: clamp(1.5rem, 4vw, 3rem);
+      right: clamp(2rem, 6vw, 7rem);
+      z-index: 20;
+    }
+
+    .brand img {
+      height: 52px;
+      width: auto;
+      display: block;
+      animation: floatY 5s ease-in-out infinite;
+    }
+
+    /* Estadísticas (slide de origen) -------------------------------------- */
+    .stat-row {
+      display: flex;
+      gap: clamp(1.5rem, 3.5vw, 2.75rem);
+      margin: 1.25rem 0 .25rem;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-num {
+      font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+      font-weight: 800;
+      color: var(--signal);
+      line-height: 1;
+      letter-spacing: -.02em;
+    }
+
+    .stat-label {
+      margin-top: .35rem;
+      font-size: .82rem;
+      color: #cfcfca;
+      font-weight: 600;
+    }
+
+    /* Línea de tiempo horizontal (slide de origen) -------------------------- */
+    /* En la diapositiva de origen, el wrap se estira a toda la altura y la
+       línea de tiempo flota centrada en el espacio libre bajo el encabezado,
+       en vez de apilarse justo debajo del párrafo. */
+    .slide-origin>.wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .timeline-h {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-top: auto;
+      margin-bottom: clamp(1rem, 4vh, 2.5rem);
+    }
+
+    .tlh-viewport {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      scrollbar-width: none;
+      cursor: grab;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, black 28px, black calc(100% - 28px), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, black 28px, black calc(100% - 28px), transparent 100%);
+    }
+
+    .tlh-viewport.dragging {
+      cursor: grabbing;
+    }
+
+    .tlh-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tlh-track {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      width: max-content;
+      padding: 1.25rem var(--tl-inset, 1.5rem) 1rem;
+      /* el padding horizontal real lo calcula JS (tlUpdateSpacers), esto es solo el valor inicial */
+    }
+
+    .tlh-track::before {
+      content: "";
+      position: absolute;
+      left: var(--tl-inset, 1.5rem);
+      right: var(--tl-inset, 1.5rem);
+      top: calc(1.25rem + 38px);
+      height: 2px;
+      background: linear-gradient(to right, rgba(236, 217, 37, .06), rgba(236, 217, 37, .55) 4%, rgba(236, 217, 37, .55) 96%, rgba(236, 217, 37, .06));
+    }
+
+    .tlh-item {
+      flex: 0 0 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 1rem;
+      animation: popIn .5s cubic-bezier(.16, 1, .3, 1) both;
+      animation-delay: calc(var(--i, 0) * .07s + .15s);
+    }
+
+    .tlh-body {
+      margin-top: 1.35rem;
+      min-height: 8.4rem;
+      /* fija para que la fila no se deforme cuando el hito activo crece a varias líneas */
+    }
+
+    .tl-dot {
+      position: relative;
+      z-index: 1;
+      flex: none;
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: var(--ink-deep);
+      border: 2px solid rgba(236, 217, 37, .4);
+      color: var(--signal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 4px rgba(236, 217, 37, .1);
+      transition: border-color .4s ease, box-shadow .4s ease, transform .5s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .tl-dot svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .tl-date {
+      font-size: .95rem;
+      font-weight: 700;
+      color: rgba(236, 217, 37, .55);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      transition: color .4s ease, font-size .4s ease;
+    }
+
+    .tl-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #8f8f8a;
+      margin-top: .4rem;
+      line-height: 1.35;
+      overflow-wrap: break-word;
+      transition: color .4s ease, font-size .4s ease;
+    }
+
+    /* El hito centrado en el viewport se ilumina y crece, como un reflector que recorre la línea */
+    .tlh-item.is-active .tl-dot {
+      border-color: var(--signal);
+      box-shadow: 0 0 0 6px rgba(236, 217, 37, .16), 0 0 32px 7px rgba(236, 217, 37, .5);
+      animation: pulseGlow 1.8s ease-in-out infinite;
+      transform: scale(1.25);
+    }
+
+    .tlh-item.is-active .tl-date {
+      color: var(--signal);
+      font-size: 1.02rem;
+    }
+
+    .tlh-item.is-active .tl-title {
+      color: #f7f7f2;
+      font-size: 1.65rem;
+    }
+
+    .tlh-btn {
+      flex: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--hair-dark);
+      background: transparent;
+      color: #cfcfca;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s, color .2s, border-color .2s, opacity .2s;
+    }
+
+    .tlh-btn:hover {
+      background: var(--signal);
+      color: var(--ink);
+      border-color: var(--signal);
+    }
+
+    .tlh-btn:disabled {
+      opacity: .25;
+      cursor: default;
+    }
+
+    .tlh-btn:disabled:hover {
+      background: transparent;
+      color: #cfcfca;
+      border-color: var(--hair-dark);
+    }
+
+    /* Equipo ------------------------------------------------------------- */
+    .team {
+      margin-top: 1.25rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .member {
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid var(--hair);
+      border-radius: 14px;
+      padding: 1.6rem 1.6rem 1.8rem;
+      transition: transform .12s ease-out, box-shadow .3s ease, border-color .3s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .member:hover {
+      box-shadow: 0 22px 48px -24px rgba(0, 0, 0, .32);
+      border-color: #ded7a0;
+    }
+
+    .member::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s ease;
+      background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(236, 217, 37, .18), transparent 60%);
+    }
+
+    .member:hover::after {
+      opacity: 1;
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--signal), var(--signal-soft));
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 1.02rem;
+      letter-spacing: .02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.1rem;
+    }
+
+    .member .mname {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -.01em;
+    }
+
+    .member .mrole {
+      color: var(--ink-soft);
+      font-size: .94rem;
+      margin-top: .35rem;
+      line-height: 1.4;
+    }
+
+    /* Cierre ------------------------------------------------------------- */
+    .close-cta {
+      margin-top: 2.5rem;
+      display: inline-block;
+      background: var(--signal);
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 1.05rem;
+      font-family: inherit;
+      padding: .9rem 1.6rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: transform .25s cubic-bezier(.16, 1, .3, 1), box-shadow .25s ease;
+    }
+
+    .close-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 32px -14px rgba(236, 217, 37, .55);
+    }
+
+    .close-cta:focus-visible {
+      outline: 3px solid var(--paper);
+      outline-offset: 3px;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 40;
+      animation: confettiPop .9s ease-out forwards;
+    }
+
+    /* Navegación --------------------------------------------------------- */
+    .nav {
+      position: fixed;
+      bottom: clamp(1.5rem, 4vw, 3rem);
+      right: clamp(2rem, 6vw, 7rem);
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      z-index: 20;
+    }
+
+    .counter {
+      font-size: .9rem;
+      font-weight: 700;
+      color: #8a8a86;
+      letter-spacing: .02em;
+      transition: color .3s ease;
+    }
+
+    body.theme-light .counter {
+      color: #9a9488;
+    }
+
+    .arrows {
+      display: flex;
+      gap: .5rem;
+    }
+
+    .arrow {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--hair-dark);
+      background: transparent;
+      color: #cfcfca;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+
+    .arrow:hover {
+      background: var(--signal);
+      color: var(--ink);
+      border-color: var(--signal);
+    }
+
+    .arrow:focus-visible {
+      outline: 3px solid var(--signal);
+      outline-offset: 2px;
+    }
+
+    .arrow:disabled {
+      opacity: .3;
+      cursor: default;
+    }
+
+    .arrow:disabled:hover {
+      background: transparent;
+      color: #cfcfca;
+      border-color: var(--hair-dark);
+    }
+
+    body.theme-light .arrow {
+      border-color: var(--hair);
+      color: #8a8478;
+    }
+
+    body.theme-light .arrow:disabled:hover {
+      background: transparent;
+      color: #8a8478;
+      border-color: var(--hair);
+    }
+
+    .dots {
+      position: fixed;
+      bottom: clamp(1.5rem, 4vw, 3rem);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: .6rem;
+      z-index: 20;
+    }
+
+    .dots button {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: #6b6b68;
+      opacity: .5;
+      transition: opacity .2s, background .2s, width .2s;
+    }
+
+    body.theme-light .dots button {
+      background: #cac5b6;
+    }
+
+    .dots button.on {
+      background: var(--signal);
+      opacity: 1;
+      width: 26px;
+      border-radius: 5px;
+    }
+
+    .dots button:focus-visible {
+      outline: 2px solid var(--signal);
+      outline-offset: 3px;
+    }
+
+    @media (max-width:760px) {
+      .stat-row {
+        gap: 2rem;
+      }
+    }
+
+    @media (max-width:640px) {
+      .nav {
+        right: 1.25rem;
+        bottom: 1.25rem;
+      }
+
+      .hint {
+        display: none;
+      }
+
+      /* las flechas y el swipe ya son evidentes en móvil */
+      .dots {
+        bottom: 4.25rem;
+      }
+
+      /* arriba de la barra de navegación, evita choques */
+      .brand {
+        right: 1.25rem;
+        top: 1.25rem;
+      }
+
+      .brand img {
+        height: 36px;
+      }
+
+      .slide {
+        padding-bottom: 7rem;
+      }
+
+      /* deja que el contenido largo (chips, tarjetas) libere la barra fija */
+
+      /* Línea de tiempo: hitos más angostos para que quepan en pantallas chicas */
+      .tlh-item {
+        flex-basis: 200px;
+      }
+
+      .tl-dot {
+        width: 48px;
+        height: 48px;
+      }
+
+      .tl-dot svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .tlh-track::before {
+        top: calc(1.25rem + 24px);
+      }
+
+      .tlh-body {
+        min-height: 7.2rem;
+      }
+
+      .tl-title {
+        font-size: .92rem;
+      }
+
+      .tlh-item.is-active .tl-dot {
+        transform: scale(1.15);
+      }
+
+      .tlh-item.is-active .tl-title {
+        font-size: 1.15rem;
+      }
+
+      .tlh-item.is-active .tl-date {
+        font-size: .82rem;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation: none !important;
+      }
+
+      .slide {
+        transition: opacity .2s ease;
+        transform: none !important;
+        filter: none !important;
+      }
+
+      .close-cta:hover,
+      .member:hover {
+        transform: none !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="deck" id="deck"></div>
+  <!-- Sprite de iconos de línea, estilo propio de marca ------------------ -->
+  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display:none"
+    aria-hidden="true">
+    <defs>
+      <g id="ico-defs" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+        stroke-linejoin="round"></g>
+    </defs>
+    <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M4 8V6a2 2 0 0 1 2-2h2" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v2" />
+      <path d="M20 16v2a2 2 0 0 1-2 2h-2" />
+      <path d="M8 20H6a2 2 0 0 1-2-2v-2" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+    </symbol>
+    <symbol id="i-flow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      stroke-linejoin="round">
+      <circle cx="5" cy="6" r="2.3" />
+      <circle cx="12" cy="18" r="2.3" />
+      <circle cx="19" cy="6" r="2.3" />
+      <path d="M7 7.6 10.2 15.8" />
+      <path d="M17 7.6 13.8 15.8" />
+    </symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      stroke-linejoin="round">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="2" />
+      <line x1="3.5" y1="9.5" x2="20.5" y2="9.5" />
+      <line x1="3.5" y1="15" x2="20.5" y2="15" />
+      <line x1="10" y1="3.5" x2="10" y2="20.5" />
+    </symbol>
+    <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="12" cy="5.5" rx="7.5" ry="2.7" />
+      <path d="M4.5 5.5V12c0 1.5 3.36 2.7 7.5 2.7s7.5-1.2 7.5-2.7V5.5" />
+      <path d="M4.5 12v6.5c0 1.5 3.36 2.7 7.5 2.7s7.5-1.2 7.5-2.7V12" />
+    </symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M7 3h7l4 4v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
+      <path d="M14 3v4h4" />
+      <path d="M9 12h6M9 16h6" />
+    </symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3 21 8l-9 5-9-5 9-5Z" />
+      <path d="M3 13l9 5 9-5" />
+      <path d="M3 17.5 12 22l9-4.5" />
+    </symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M3 3h8l10 10-8 8L3 11V3Z" />
+      <circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none" />
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3Z" />
+      <path d="M9 12l2.2 2.2L15.5 9.5" />
+    </symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      stroke-linejoin="round">
+      <path d="M4 15a8 8 0 1 1 16 0" />
+      <path d="M12 15 15.5 9" />
+      <circle cx="12" cy="15" r="1.2" fill="currentColor" stroke="none" />
+    </symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+      <circle cx="12" cy="13.5" r="3.5" />
+    </symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M10.3 2h3.4l.5 2.1a7.9 7.9 0 0 1 1.7.7l1.9-1.1 2.4 2.4-1.1 1.9c.3.5.5 1.1.7 1.7L22 10.3v3.4l-2.1.5a7.9 7.9 0 0 1-.7 1.7l1.1 1.9-2.4 2.4-1.9-1.1c-.5.3-1.1.5-1.7.7L13.7 22h-3.4l-.5-2.1a7.9 7.9 0 0 1-1.7-.7l-1.9 1.1-2.4-2.4 1.1-1.9a7.9 7.9 0 0 1-.7-1.7L2 13.7v-3.4l2.1-.5c.1-.6.4-1.2.7-1.7L3.7 6.2l2.4-2.4 1.9 1.1c.5-.3 1.1-.5 1.7-.7L10.3 2z"
+        stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+    </symbol>
+  </svg>
 
-<div class="brand"><img id="brandLogo" src="resources/logos/logo-blanco.png" alt="V&C"></div>
-<div class="dots" id="dots" role="tablist" aria-label="Ir a diapositiva"></div>
-<div class="nav">
-  <span class="counter" id="counter">01 / 05</span>
-  <div class="arrows">
-    <button class="arrow" id="prev" aria-label="Anterior">&larr;</button>
-    <button class="arrow" id="next" aria-label="Siguiente">&rarr;</button>
+  <div class="grain"></div>
+  <div class="spotlight" id="spotlight"></div>
+  <div class="progress" id="progress"></div>
+
+  <div class="deck" id="deck"></div>
+
+  <div class="brand"><img id="brandLogo" src="resources/logos/logo-blanco.png" alt="V&amp;C"></div>
+  <div class="dots" id="dots" role="tablist" aria-label="Ir a diapositiva"></div>
+  <div class="nav">
+    <span class="counter" id="counter">01 / 05</span>
+    <div class="arrows">
+      <button class="arrow" id="prev" aria-label="Anterior">&larr;</button>
+      <button class="arrow" id="next" aria-label="Siguiente">&rarr;</button>
+    </div>
   </div>
-</div>
 
-<script>
-/* =========================================================================
-   ▸ EDITA AQUÍ — todo lo personalizable vive en este bloque
-   ========================================================================= */
-const CONFIG = {
-  nuevoIntegrante: "Ivan Zamorano",  // ← cámbialo por el nombre real
-  nombreEquipo: "Equipo de TI e Innovación",
-  empresa: "Verificación y Control UVA",
+  <script>
+    /* =========================================================================
+       ▸ EDITA AQUÍ — todo lo personalizable vive en este bloque
+       ========================================================================= */
+    const CONFIG = {
+      nuevoIntegrante: "Ivan Zamorano",  // ← cámbialo por el nombre real
+      nombreEquipo: "Equipo de TI e Innovación",
+      empresa: "Verificación y Control UVA",
 
-  // Lo que hemos construido, agrupado en tres bloques.
-  // Puedes usar <b>...</b> para resaltar el nombre del cliente o del sistema.
-  trabajo: [
-    { grupo:"Proyectos para clientes", items:[
-        "<b>Decathlon:</b> escaneo y tipos de procesos",
-        "<b>ULTA:</b> tablas de relación, bases de etiquetado y escaneo",
-    ]},
-    { grupo:"Sistemas internos V&C", items:[
-        "SEA",
-        "Sistema de emisión de etiquetado",
-        "Sistema de fiabilidad — evaluaciones técnicas y exámenes de calibración",
-        "Sistema de asignaciones multibrand",
-    ]},
-    { grupo:"Escaneo e inteligencia artificial", items:[
-        "Aplicación de escaneo de imágenes",
-        "Evaluación de etiquetas con IA",
-    ]},
-  ],
+      // Historia del área: cuánto tiempo llevamos y qué hemos creado en ese tiempo.
+      origen: {
+        antiguedad: 1, // años de vida del área
+        // Orden cronológico: así se dibuja la línea de tiempo.
+        herramientas: [
+          { nombre: "Escaneo Decathlon", icon: "scan", fecha: "8 jul 2025" },
+          { nombre: "Inspección de cumplimiento normativo al arribo", icon: "shield", fecha: "16 ago 2025" },
+          { nombre: "Tablas de relación ULTA", icon: "grid", fecha: "oct 2025" },
+          { nombre: "Bases de etiquetado ULTA", icon: "database", fecha: "oct 2025" },
+          { nombre: "Escaneo ULTA", icon: "camera", fecha: "oct 2025" },
+          { nombre: "Generador de documentos VyC", icon: "doc", fecha: "nov 2025" },
+          { nombre: "Sistema de emisión de etiquetado", icon: "flow", fecha: "12 nov 2025" },
+          { nombre: "SEA", icon: "layers", fecha: "27 mar 2026" },
+          { nombre: "Extractor de pedimentos", icon: "tag", fecha: "29 jun 2026" },
+          { nombre: "Fiabilidad técnica", icon: "gauge", fecha: "3 jul 2026" },
+        ],
+      },
 
-  // El equipo. Agrega tantos integrantes como necesites.
-  equipo: [
-    { nombre:"[Tu nombre]",       rol:"Ejecutivo de Innovación" },
-    { nombre:"[Integrante 2]",    rol:"[Rol]" },
-    { nombre:"[Integrante 3]",    rol:"[Rol]" },
-  ],
+      // El equipo. Agrega tantos integrantes como necesites.
+      equipo: [
+        { nombre: "[Tu nombre]", rol: "Ejecutivo de Innovación" },
+        { nombre: "[Integrante 2]", rol: "[Rol]" },
+        { nombre: "[Integrante 3]", rol: "[Rol]" },
+      ],
 
-  // Cierre
-  dondeEncontrarnos: "Nos encuentras en el área de Innovación. Cualquier cosa que necesites automatizar o resolver con una herramienta, con nosotros.",
-};
-/* ===================== fin de la zona editable ========================= */
+      // Cierre
+      dondeEncontrarnos: "Nos encuentras en el área de Innovación. Cualquier cosa que necesites automatizar o resolver con una herramienta, con nosotros.",
+    };
+    /* ===================== fin de la zona editable ========================= */
 
 
-/* --- Generación de las diapositivas (no necesitas tocar esto) ---------- */
-const workHTML = CONFIG.trabajo.map(g =>
-  `<div class="work-col">
-     <div class="cbar"></div>
-     <h3>${g.grupo}</h3>
-     <ul>${g.items.map(it=>`<li>${it}</li>`).join("")}</ul>
+    /* --- Generación de las diapositivas (no necesitas tocar esto) ---------- */
+    function initials(name) {
+      const clean = name.replace(/[\[\]]/g, "").trim();
+      const parts = clean.split(/\s+/).filter(Boolean);
+      if (!parts.length) return "?";
+      return parts.slice(0, 2).map(p => p[0].toUpperCase()).join("");
+    }
+
+    const timelineHTML = CONFIG.origen.herramientas.map((h, i) =>
+      `<div class="tlh-item" style="--i:${i}">
+     <div class="tl-dot"><svg><use href="#i-${h.icon}" xlink:href="#i-${h.icon}"></use></svg></div>
+     <div class="tlh-body">
+       <div class="tl-date">${h.fecha}</div>
+       <div class="tl-title">${h.nombre}</div>
+     </div>
    </div>`).join("");
 
-const teamHTML = CONFIG.equipo.map((m,i) =>
-  `<div class="member">
-     <div class="midx">${String(i+1).padStart(2,"0")}</div>
+    const teamHTML = CONFIG.equipo.map((m) =>
+      `<div class="member">
+     <div class="avatar">${initials(m.nombre)}</div>
      <div class="mname">${m.nombre}</div>
      <div class="mrole">${m.rol}</div>
    </div>`).join("");
 
-const slides = [
-  // 1 · Bienvenida
-  `<div class="wrap">
-     <div class="keyline"></div>
+    const meshBig = `<div class="mesh-layer" aria-hidden="true">
+     <span class="blob b1"></span><span class="blob b2"></span>
+     <img class="watermark" src="resources/logos/logo-blanco.png" alt="">
+   </div>`;
+    const meshSmall = `<div class="mesh-layer" aria-hidden="true">
+     <span class="blob b1"></span><span class="blob b2"></span>
+   </div>`;
+    const meshLight = `<div class="mesh-layer light" aria-hidden="true">
+     <span class="blob b1"></span><span class="blob b2"></span>
+     <img class="watermark" src="resources/logos/logo-negro.png" alt="">
+   </div>`;
+    const meshLightDeco = (iconId) => `<div class="mesh-layer light" aria-hidden="true">
+     <span class="blob b1"></span><span class="blob b2"></span>
+     <svg class="deco-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#${iconId}" xlink:href="#${iconId}"></use></svg>
+   </div>`;
+
+    const slides = [
+      // 1 · Bienvenida
+      `${meshBig}
+   <div class="wrap">
+     <div class="keyline glow"></div>
      <div class="eyebrow">${CONFIG.nombreEquipo} · ${CONFIG.empresa}</div>
      <h1>Bienvenido,<span class="name">${CONFIG.nuevoIntegrante}</span></h1>
      <p class="hero-sub">Somos el equipo que hace que las cosas funcionen por dentro.</p>
    </div>
    <div class="hint">Usa las flechas &larr; &rarr; para avanzar</div>`,
 
-  // 2 · Quiénes somos
-  `<div class="wrap">
+      // 2 · Quiénes somos
+      `${meshLightDeco("i-gear")}
+   <div class="wrap">
      <div class="keyline"></div>
      <div class="eyebrow">Quiénes somos</div>
      <h2>El motor detrás de la operación.</h2>
-     <p class="lead">Somos el ${CONFIG.nombreEquipo.replace(/^Equipo de /,"equipo de ")} de ${CONFIG.empresa}. Convertimos trámites manuales en sistemas: menos captura a mano, menos errores y más tiempo para lo que importa. Somos pocos, pero movemos mucho.</p>
+     <p class="lead">Somos el ${CONFIG.nombreEquipo.replace(/^Equipo de /, "equipo de ")} de ${CONFIG.empresa}. Convertimos trámites manuales en sistemas: menos captura a mano, menos errores y más tiempo para lo que importa. Somos pocos, pero movemos mucho.</p>
    </div>`,
 
-  // 3 · Qué hemos hecho
-  `<div class="wrap">
-     <div class="keyline"></div>
-     <div class="eyebrow">Qué hemos hecho</div>
-     <h2>Un poco de lo que hemos construido.</h2>
-     <div class="work-grid">${workHTML}</div>
+      // 3 · Nuestro origen
+      `${meshSmall}
+   <div class="wrap">
+     <div class="keyline glow"></div>
+     <div class="eyebrow">Nuestro origen</div>
+     <h2 class="h2-tight">Nacimos para hacer todo más rápido.</h2>
+     <p class="lead lead-tight">Un área nueva dentro de ${CONFIG.empresa}, con apenas <strong>${CONFIG.origen.antiguedad} año</strong> de vida. Esto es lo que hemos construido:</p>
+     <div class="stat-row">
+       <div class="stat"><span class="stat-num" data-count="${CONFIG.origen.antiguedad}">0</span><span class="stat-label">año de vida</span></div>
+       <div class="stat"><span class="stat-num" data-count="${CONFIG.origen.herramientas.length}">0</span><span class="stat-label">herramientas creadas</span></div>
+     </div>
+     <div class="timeline-h">
+       <button class="tlh-btn" id="tlPrev" type="button" aria-label="Hitos anteriores">&larr;</button>
+       <div class="tlh-viewport" id="tlViewport">
+         <div class="tlh-track">${timelineHTML}</div>
+       </div>
+       <button class="tlh-btn" id="tlNext" type="button" aria-label="Hitos siguientes">&rarr;</button>
+     </div>
    </div>`,
 
-  // 4 · El equipo
-  `<div class="wrap">
+      // 4 · El equipo
+      `${meshLight}
+   <div class="wrap">
      <div class="keyline"></div>
      <div class="eyebrow">El equipo</div>
-     <h2>Con quiénes vas a trabajar.</h2>
+     <h2>Detrás de cada herramienta, un equipo real.</h2>
      <div class="team">${teamHTML}</div>
    </div>`,
 
-  // 5 · Cierre
-  `<div class="wrap">
-     <div class="keyline"></div>
+      // 5 · Cierre
+      `${meshBig}
+   <div class="wrap">
+     <div class="keyline glow"></div>
      <div class="eyebrow">Aquí estamos</div>
      <h2>Bienvenido al equipo.</h2>
      <p class="lead">${CONFIG.dondeEncontrarnos}</p>
-     <span class="close-cta">Vamos a construir cosas buenas.</span>
+     <button class="close-cta" id="ctaBtn" type="button">Vamos a construir cosas buenas.</button>
    </div>`,
-];
+    ];
 
-const themes = ["dark","light","light","light","dark"];
+    const themes = ["dark", "light", "dark", "light", "dark"];
+    const ORIGEN_INDEX = 2;
 
-// El logo cambia de color según el fondo de cada slide para mantener el contraste
-const LOGOS = { dark:"resources/logos/logo-blanco.png", light:"resources/logos/logo-negro.png" };
-const brandLogo = document.getElementById("brandLogo");
+    // El logo cambia de color según el fondo de cada slide para mantener el contraste
+    const LOGOS = { dark: "resources/logos/logo-blanco.png", light: "resources/logos/logo-negro.png" };
+    const brandLogo = document.getElementById("brandLogo");
 
-const deck = document.getElementById("deck");
-deck.innerHTML = slides.map((html,i) =>
-  `<section class="slide ${themes[i]}" data-i="${i}">${html}</section>`).join("");
+    const deck = document.getElementById("deck");
+    deck.innerHTML = slides.map((html, i) =>
+      `<section class="slide ${themes[i]}${i === ORIGEN_INDEX ? " slide-origin" : ""}" data-i="${i}">${html}</section>`).join("");
 
-const sections = [...deck.querySelectorAll(".slide")];
-const dotsBox = document.getElementById("dots");
-dotsBox.innerHTML = sections.map((_,i)=>`<button role="tab" aria-label="Diapositiva ${i+1}"></button>`).join("");
-const dots = [...dotsBox.querySelectorAll("button")];
-const counter = document.getElementById("counter");
-const prevBtn = document.getElementById("prev");
-const nextBtn = document.getElementById("next");
+    const sections = [...deck.querySelectorAll(".slide")];
+    const dotsBox = document.getElementById("dots");
+    dotsBox.innerHTML = sections.map((_, i) => `<button role="tab" aria-label="Diapositiva ${i + 1}"></button>`).join("");
+    const dots = [...dotsBox.querySelectorAll("button")];
+    const counter = document.getElementById("counter");
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
+    const progressEl = document.getElementById("progress");
 
-let cur = 0;
-function show(n){
-  cur = Math.max(0, Math.min(slides.length-1, n));
-  sections.forEach((s,i)=>{
-    s.classList.toggle("active", i===cur);
-    s.classList.toggle("past", i<cur);
-  });
-  dots.forEach((d,i)=>d.classList.toggle("on", i===cur));
-  counter.textContent = String(cur+1).padStart(2,"0")+" / "+String(slides.length).padStart(2,"0");
-  prevBtn.disabled = cur===0;
-  nextBtn.disabled = cur===slides.length-1;
-  brandLogo.src = LOGOS[themes[cur]];
-}
-show(0);
+    /* --- Fondo animado: partículas que se conectan, solo en slides oscuras - */
+    const REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const bgCanvas = document.createElement("canvas");
+    let ctx = null, particles = [], raf = null;
+    const mouse = { x: -9999, y: -9999 };
 
-nextBtn.onclick = ()=>show(cur+1);
-prevBtn.onclick = ()=>show(cur-1);
-dots.forEach((d,i)=>d.onclick=()=>show(i));
+    function sizeCanvas() {
+      if (!bgCanvas.parentElement) return;
+      const rect = bgCanvas.parentElement.getBoundingClientRect();
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      bgCanvas.width = Math.max(1, rect.width * dpr);
+      bgCanvas.height = Math.max(1, rect.height * dpr);
+      bgCanvas.style.width = rect.width + "px";
+      bgCanvas.style.height = rect.height + "px";
+      ctx = bgCanvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      seedParticles(rect.width, rect.height);
+    }
+    function seedParticles(w, h) {
+      const count = Math.max(16, Math.min(55, Math.floor((w * h) / 26000)));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * w, y: Math.random() * h,
+        vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25,
+      }));
+    }
+    function tick() {
+      if (!ctx || !bgCanvas.parentElement) { raf = null; return; }
+      const w = bgCanvas.clientWidth, h = bgCanvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      for (const p of particles) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+        const dx = mouse.x - p.x, dy = mouse.y - p.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 9000) { const f = (9000 - d2) / 9000 * .03; p.vx -= dx * f * .02; p.vy -= dy * f * .02; }
+      }
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < 130) {
+            ctx.strokeStyle = `rgba(236,217,37,${(1 - dist / 130) * .22})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      ctx.fillStyle = "rgba(236,217,37,.65)";
+      for (const p of particles) { ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2); ctx.fill(); }
+      raf = requestAnimationFrame(tick);
+    }
+    function mountCanvasInto(layer) {
+      if (!layer || REDUCE_MOTION) return;
+      if (bgCanvas.parentElement !== layer) layer.appendChild(bgCanvas);
+      requestAnimationFrame(sizeCanvas);
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
+    function unmountLoop() {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+    }
+    window.addEventListener("resize", () => { if (bgCanvas.parentElement) sizeCanvas(); });
+    document.addEventListener("mousemove", e => {
+      if (!bgCanvas.parentElement) return;
+      const rect = bgCanvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top;
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) unmountLoop();
+      else if (bgCanvas.parentElement && !raf) raf = requestAnimationFrame(tick);
+    });
 
-document.addEventListener("keydown", e=>{
-  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();show(cur+1);}
-  if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();show(cur-1);}
-  if(e.key==="Home"){show(0);}
-  if(e.key==="End"){show(slides.length-1);}
-});
+    /* --- Halo que sigue el cursor (solo visible sobre slides oscuras) ------ */
+    const spotlight = document.getElementById("spotlight");
+    document.addEventListener("mousemove", e => {
+      spotlight.style.setProperty("--mx", e.clientX + "px");
+      spotlight.style.setProperty("--my", e.clientY + "px");
+    });
 
-// Swipe en móvil / clic en mitades de pantalla
-let x0=null;
-deck.addEventListener("touchstart",e=>x0=e.touches[0].clientX,{passive:true});
-deck.addEventListener("touchend",e=>{
-  if(x0===null)return;
-  const dx=e.changedTouches[0].clientX-x0;
-  if(Math.abs(dx)>50) dx<0?show(cur+1):show(cur-1);
-  x0=null;
-});
-</script>
+    /* --- Inclinación 3D suave en tarjetas al pasar el cursor ---------------- */
+    function attachTilt(el) {
+      el.addEventListener("mousemove", e => {
+        if (REDUCE_MOTION) return;
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+        el.style.setProperty("--mx", (px * 100) + "%");
+        el.style.setProperty("--my", (py * 100) + "%");
+        el.style.transform = `perspective(700px) rotateX(${(py - .5) * -6}deg) rotateY(${(px - .5) * 6}deg) translateY(-4px)`;
+      });
+      el.addEventListener("mouseleave", () => { el.style.transform = ""; });
+    }
+    deck.querySelectorAll(".member").forEach(attachTilt);
+
+    /* --- Línea de tiempo horizontal: botones, rueda, arrastre y autoscroll -- */
+    const tlViewport = document.getElementById("tlViewport");
+    const tlPrev = document.getElementById("tlPrev");
+    const tlNext = document.getElementById("tlNext");
+    const tlTrack = tlViewport ? tlViewport.querySelector(".tlh-track") : null;
+    const tlItems = tlViewport ? [...tlViewport.querySelectorAll(".tlh-item")] : [];
+
+    // El primer y el último hito no pueden quedar centrados por sí solos (no
+    // hay más contenido hacia dónde desplazar). Se agrega un margen invisible
+    // a cada lado del track, del tamaño justo para que sí alcancen el centro.
+    function tlUpdateSpacers() {
+      if (!tlViewport || !tlTrack || !tlItems.length) return;
+      const itemW = tlItems[0].offsetWidth;
+      const spacer = Math.max(0, (tlViewport.clientWidth - itemW) / 2);
+      tlTrack.style.paddingLeft = spacer + "px";
+      tlTrack.style.paddingRight = spacer + "px";
+      tlTrack.style.setProperty("--tl-inset", spacer + "px");
+    }
+
+    // Cerca de los extremos, ningún hito puede quedar geométricamente centrado
+    // (no hay más contenido hacia dónde desplazar) — así que ahí el índice
+    // se decide por posición de scroll, no por cercanía al centro.
+    function tlClosestIndexFromScroll() {
+      if (!tlViewport || !tlItems.length) return 0;
+      if (tlViewport.scrollLeft <= 2) return 0;
+      const max = tlViewport.scrollWidth - tlViewport.clientWidth;
+      if (tlViewport.scrollLeft >= max - 2) return tlItems.length - 1;
+      const center = tlViewport.scrollLeft + tlViewport.clientWidth / 2;
+      let idx = 0, closestDist = Infinity;
+      tlItems.forEach((item, i) => {
+        const mid = item.offsetLeft + item.offsetWidth / 2;
+        const d = Math.abs(mid - center);
+        if (d < closestDist) { closestDist = d; idx = i; }
+      });
+      return idx;
+    }
+    function updateActiveTlItem() {
+      if (!tlViewport || !tlItems.length) return;
+      const activeIdx = tlClosestIndexFromScroll();
+      tlItems.forEach((item, i) => item.classList.toggle("is-active", i === activeIdx));
+    }
+
+    // Autoscroll paso a paso: centra un hito, lo deja crecido ahí un momento,
+    // avanza al siguiente, y al llegar al final vuelve a empezar desde el 0
+    // (salto instantáneo, no reversa) — como un reflector que recorre la línea.
+    const TL_STEP_MS = 3400; // tiempo total por hito (traslado + pausa al centro)
+    let tlIndex = 0, tlStepTimer = null, tlAutoHovered = false, tlPausedByUser = false, tlPauseTimer = null, tlUserMoved = false;
+
+    function tlGoToIndex(i, behavior = "smooth") {
+      const item = tlItems[i];
+      if (!item || !tlViewport) return;
+      const max = tlViewport.scrollWidth - tlViewport.clientWidth;
+      const target = Math.max(0, Math.min(max, item.offsetLeft + item.offsetWidth / 2 - tlViewport.clientWidth / 2));
+      tlViewport.scrollTo({ left: target, behavior });
+    }
+    function tlScheduleNext() {
+      clearTimeout(tlStepTimer);
+      tlStepTimer = setTimeout(() => {
+        if (tlPausedByUser || tlAutoHovered) { tlScheduleNext(); return; }
+        // Solo resincroniza el índice si el usuario movió la línea manualmente
+        // desde el último paso automático — si no, el contador interno manda,
+        // porque cerca de los extremos el scroll real nunca "encuentra" el
+        // índice exacto (ver tlClosestIndexFromScroll).
+        if (tlUserMoved) { tlIndex = tlClosestIndexFromScroll(); tlUserMoved = false; }
+        if (tlIndex >= tlItems.length - 1) {
+          tlIndex = 0;
+          tlGoToIndex(0, "auto"); // corte instantáneo al inicio, sin animar el regreso
+        } else {
+          tlIndex += 1;
+          tlGoToIndex(tlIndex);
+        }
+        tlScheduleNext();
+      }, TL_STEP_MS);
+    }
+    function startTlAuto() {
+      if (REDUCE_MOTION || tlStepTimer || !tlViewport) return;
+      tlScheduleNext();
+    }
+    function stopTlAuto() {
+      clearTimeout(tlStepTimer);
+      tlStepTimer = null;
+    }
+    function resetTlAuto() {
+      if (!tlViewport) return;
+      tlIndex = 0; tlUserMoved = false;
+      tlUpdateSpacers();
+      tlViewport.scrollLeft = 0;
+      updateActiveTlItem();
+      stopTlAuto();
+      startTlAuto();
+    }
+    function nudgeTlPause(ms = 3200) {
+      tlPausedByUser = true;
+      tlUserMoved = true;
+      clearTimeout(tlPauseTimer);
+      tlPauseTimer = setTimeout(() => { tlPausedByUser = false; }, ms);
+    }
+
+    if (tlViewport && tlPrev && tlNext) {
+      const step = () => Math.max(220, tlViewport.clientWidth * .8);
+      const updateTl = () => {
+        tlPrev.disabled = tlViewport.scrollLeft <= 2;
+        tlNext.disabled = tlViewport.scrollLeft >= tlViewport.scrollWidth - tlViewport.clientWidth - 2;
+        updateActiveTlItem();
+      };
+      tlPrev.addEventListener("click", () => { nudgeTlPause(); tlViewport.scrollBy({ left: -step(), behavior: "smooth" }); });
+      tlNext.addEventListener("click", () => { nudgeTlPause(); tlViewport.scrollBy({ left: step(), behavior: "smooth" }); });
+      tlViewport.addEventListener("scroll", updateTl, { passive: true });
+      window.addEventListener("resize", () => {
+        tlUpdateSpacers();
+        tlGoToIndex(tlIndex, "auto"); // vuelve a centrar el hito activo con el nuevo ancho
+        updateTl();
+      });
+      tlUpdateSpacers();
+      updateTl();
+
+      tlViewport.addEventListener("mouseenter", () => { tlAutoHovered = true; });
+      tlViewport.addEventListener("mouseleave", () => { tlAutoHovered = false; nudgeTlPause(700); });
+      tlViewport.addEventListener("touchstart", () => nudgeTlPause(), { passive: true });
+
+      tlViewport.addEventListener("wheel", e => {
+        if (tlViewport.scrollWidth <= tlViewport.clientWidth) return;
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          nudgeTlPause();
+          tlViewport.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      let dragging = false, dragMoved = false, startX = 0, startScroll = 0;
+      tlViewport.addEventListener("pointerdown", e => {
+        if (e.pointerType !== "mouse") return;
+        dragging = true; dragMoved = false;
+        startX = e.clientX; startScroll = tlViewport.scrollLeft;
+        nudgeTlPause();
+        tlViewport.classList.add("dragging");
+        tlViewport.setPointerCapture(e.pointerId);
+      });
+      tlViewport.addEventListener("pointermove", e => {
+        if (!dragging) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 4) dragMoved = true;
+        tlViewport.scrollLeft = startScroll - dx;
+      });
+      const endTlDrag = () => { dragging = false; tlViewport.classList.remove("dragging"); };
+      tlViewport.addEventListener("pointerup", endTlDrag);
+      tlViewport.addEventListener("pointerleave", endTlDrag);
+      tlViewport.addEventListener("click", e => { if (dragMoved) { e.preventDefault(); e.stopPropagation(); } }, true);
+    }
+
+    /* --- Contadores animados (slide de origen) ------------------------------ */
+    function animateCount(el, target, duration = 1100) {
+      if (REDUCE_MOTION) { el.textContent = target; return; }
+      const start = performance.now();
+      function frame(now) {
+        const p = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased);
+        if (p < 1) requestAnimationFrame(frame); else el.textContent = target;
+      }
+      requestAnimationFrame(frame);
+    }
+    function runStats() {
+      sections[ORIGEN_INDEX].querySelectorAll(".stat-num[data-count]").forEach(el => {
+        animateCount(el, parseInt(el.dataset.count, 10));
+      });
+    }
+
+    /* --- Confeti al llegar / pulsar el botón de cierre ---------------------- */
+    function burstConfetti(originEl) {
+      if (REDUCE_MOTION || !originEl) return;
+      const rect = originEl.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      const colors = ["#ECD925", "#fff3a0", "#ffffff", "#c9ae00"];
+      for (let i = 0; i < 26; i++) {
+        const s = document.createElement("span");
+        s.className = "confetti-piece";
+        const angle = Math.random() * Math.PI * 2, dist = 80 + Math.random() * 160;
+        s.style.setProperty("--tx", Math.cos(angle) * dist + "px");
+        s.style.setProperty("--ty", (Math.sin(angle) * dist - 40) + "px");
+        s.style.setProperty("--r", (Math.random() * 360) + "deg");
+        s.style.left = cx + "px"; s.style.top = cy + "px";
+        s.style.background = colors[i % colors.length];
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 950);
+      }
+    }
+    const ctaBtn = document.getElementById("ctaBtn");
+    ctaBtn && ctaBtn.addEventListener("click", () => burstConfetti(ctaBtn));
+    let autoBurstDone = false;
+
+    let cur = 0;
+    function show(n) {
+      cur = Math.max(0, Math.min(slides.length - 1, n));
+      sections.forEach((s, i) => {
+        s.classList.toggle("active", i === cur);
+        s.classList.toggle("past", i < cur);
+      });
+      dots.forEach((d, i) => d.classList.toggle("on", i === cur));
+      counter.textContent = String(cur + 1).padStart(2, "0") + " / " + String(slides.length).padStart(2, "0");
+      prevBtn.disabled = cur === 0;
+      nextBtn.disabled = cur === slides.length - 1;
+      brandLogo.src = LOGOS[themes[cur]];
+      progressEl.style.width = ((cur + 1) / slides.length * 100) + "%";
+      document.body.classList.toggle("theme-dark", themes[cur] === "dark");
+      document.body.classList.toggle("theme-light", themes[cur] !== "dark");
+
+      if (themes[cur] === "dark") mountCanvasInto(sections[cur].querySelector(".mesh-layer"));
+      else unmountLoop();
+
+      if (cur === ORIGEN_INDEX) { runStats(); resetTlAuto(); }
+      else { stopTlAuto(); }
+      if (cur === slides.length - 1 && !autoBurstDone) {
+        autoBurstDone = true;
+        setTimeout(() => burstConfetti(ctaBtn), 500);
+      }
+    }
+    show(0);
+
+    nextBtn.onclick = () => show(cur + 1);
+    prevBtn.onclick = () => show(cur - 1);
+    dots.forEach((d, i) => d.onclick = () => show(i));
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); show(cur + 1); }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); show(cur - 1); }
+      if (e.key === "Home") { show(0); }
+      if (e.key === "End") { show(slides.length - 1); }
+    });
+
+    // Swipe en móvil / clic en mitades de pantalla
+    let x0 = null;
+    deck.addEventListener("touchstart", e => {
+      // Ignora el swipe de diapositiva si el toque empieza en la línea de tiempo horizontal (tiene su propio scroll)
+      x0 = e.target.closest(".tlh-viewport") ? null : e.touches[0].clientX;
+    }, { passive: true });
+    deck.addEventListener("touchend", e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 50) dx < 0 ? show(cur + 1) : show(cur - 1);
+      x0 = null;
+    });
+  </script>
 </body>
+
 </html>
