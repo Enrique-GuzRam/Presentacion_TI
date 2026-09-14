@@ -715,9 +715,16 @@
       animation-delay: calc(var(--i, 0) * .16s + .5s);
     }
 
-    .client-card:hover {
+    .client-card:hover,
+    .client-card.is-lit {
       box-shadow: 0 22px 48px -24px rgba(0, 0, 0, .32);
       border-color: #ded7a0;
+    }
+
+    /* El carrusel automático "levanta" la tarjeta encendida; el hover ya se
+       encarga de su propia inclinación 3D vía JS, así que no se pisan */
+    .client-card.is-lit {
+      transform: translateY(-4px);
     }
 
     .client-card::after {
@@ -730,7 +737,8 @@
       background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(236, 217, 37, .18), transparent 60%);
     }
 
-    .client-card:hover::after {
+    .client-card:hover::after,
+    .client-card.is-lit::after {
       opacity: 1;
     }
 
@@ -743,6 +751,12 @@
       filter: grayscale(1);
       opacity: .7;
       transition: filter .35s ease, opacity .35s ease;
+    }
+
+    .client-card:hover .client-logo,
+    .client-card.is-lit .client-logo {
+      filter: grayscale(0);
+      opacity: 1;
     }
 
     .client-card:hover .client-logo {
@@ -1232,6 +1246,7 @@
 
     const themes = ["dark", "light", "dark", "light", "dark"];
     const ORIGEN_INDEX = 2;
+    const CLIENTS_INDEX = 3;
 
     // El logo cambia de color según el fondo de cada slide para mantener el contraste
     const LOGOS = { dark: "resources/logos/logo-blanco.png", light: "resources/logos/logo-negro.png" };
@@ -1341,7 +1356,37 @@
       });
       el.addEventListener("mouseleave", () => { el.style.transform = ""; });
     }
-    deck.querySelectorAll(".client-card").forEach(attachTilt);
+    const clientCards = [...deck.querySelectorAll(".client-card")];
+    clientCards.forEach(attachTilt);
+
+    /* --- Carrusel de clientes: enciende un logo a la vez en bucle ---------- */
+    let clientsTimer = null;
+    let clientsKickoff = null;
+    let clientsLitIdx = -1;
+
+    function setClientsLit(i) {
+      clientCards.forEach((c, idx) => c.classList.toggle("is-lit", idx === i));
+    }
+
+    function startClientsAuto() {
+      if (REDUCE_MOTION || clientsTimer || clientsKickoff || !clientCards.length) return;
+      // Espera a que termine la entrada escalonada (logoPop) antes de arrancar el carrusel
+      clientsKickoff = setTimeout(() => {
+        clientsKickoff = null;
+        clientsLitIdx = 0;
+        setClientsLit(clientsLitIdx);
+        clientsTimer = setInterval(() => {
+          clientsLitIdx = (clientsLitIdx + 1) % clientCards.length;
+          setClientsLit(clientsLitIdx);
+        }, 1100);
+      }, 1900);
+    }
+
+    function stopClientsAuto() {
+      clearTimeout(clientsKickoff); clientsKickoff = null;
+      clearInterval(clientsTimer); clientsTimer = null;
+      clientCards.forEach(c => c.classList.remove("is-lit"));
+    }
 
     /* --- Línea de tiempo horizontal: botones, rueda, arrastre y autoscroll -- */
     const tlViewport = document.getElementById("tlViewport");
@@ -1555,6 +1600,8 @@
 
       if (cur === ORIGEN_INDEX) { runStats(); resetTlAuto(); }
       else { stopTlAuto(); }
+      if (cur === CLIENTS_INDEX) startClientsAuto();
+      else stopClientsAuto();
       if (cur === slides.length - 1 && !autoBurstDone) {
         autoBurstDone = true;
         setTimeout(() => burstConfetti(ctaBtn), 500);
