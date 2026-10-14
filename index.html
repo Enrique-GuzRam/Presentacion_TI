@@ -250,7 +250,7 @@
       }
     }
 
-    /* Fondo animado (solo diapositivas oscuras) --------------------------- */
+    /* Fondo animado ------------------------------------------------------- */
     .mesh-layer {
       position: absolute;
       inset: 0;
@@ -305,13 +305,13 @@
       user-select: none;
     }
 
-    /* Variante clara del fondo: mismo lenguaje visual, mucho más sutil ----- */
+    /* Variante clara del fondo: mismo lenguaje visual, un poco más sutil --- */
     .mesh-layer.light .b1 {
-      background: radial-gradient(circle, rgba(236, 217, 37, .24), rgba(236, 217, 37, 0) 70%);
+      background: radial-gradient(circle, rgba(236, 217, 37, .34), rgba(236, 217, 37, 0) 70%);
     }
 
     .mesh-layer.light .b2 {
-      background: radial-gradient(circle, rgba(255, 205, 60, .16), rgba(255, 205, 60, 0) 70%);
+      background: radial-gradient(circle, rgba(255, 205, 60, .24), rgba(255, 205, 60, 0) 70%);
     }
 
     .mesh-layer.light .watermark {
@@ -363,6 +363,13 @@
 
     body.theme-dark .spotlight {
       opacity: 1;
+    }
+
+    /* soft-light no tiñe sobre blanco; multiply sí deja el halo amarillo */
+    body.theme-light .spotlight {
+      opacity: 1;
+      mix-blend-mode: multiply;
+      background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 50%), rgba(236, 217, 37, .2), transparent 60%);
     }
 
     .progress {
@@ -419,6 +426,10 @@
       animation: shimmer 5s linear infinite;
     }
 
+    .slide.light h1 .name {
+      background-image: linear-gradient(90deg, #8a7d00, #b5a200, #8a7d00);
+    }
+
     h2 {
       font-weight: 700;
       font-size: clamp(1.9rem, 4.5vw, 3rem);
@@ -448,7 +459,7 @@
       font-weight: 700;
     }
 
-    p.lead + p.lead {
+    p.lead+p.lead {
       margin-top: 1rem;
     }
 
@@ -470,18 +481,8 @@
       color: #cfcfca;
     }
 
-    .hint {
-      position: absolute;
-      bottom: clamp(1.5rem, 4vw, 3rem);
-      left: clamp(2rem, 6vw, 7rem);
-      font-size: .85rem;
-      color: #8a8a86;
-      font-weight: 500;
-      transition: color .3s ease;
-    }
-
-    body.theme-light .hint {
-      color: #a39d8f;
+    .slide.light .hero-sub {
+      color: #3d3d3a;
     }
 
     /* Logo de marca -------------------------------------------------------- */
@@ -567,11 +568,14 @@
     }
 
     .tlh-track {
+      /* el viewport recorta en vertical (overflow-y: hidden), así que este
+         margen superior tiene que alcanzar para el brillo del hito activo */
+      --tl-pad-top: 3rem;
       position: relative;
       display: flex;
       align-items: flex-start;
       width: max-content;
-      padding: 1.25rem var(--tl-inset, 1.5rem) 1rem;
+      padding: var(--tl-pad-top) var(--tl-inset, 1.5rem) 1rem;
       /* el padding horizontal real lo calcula JS (tlUpdateSpacers), esto es solo el valor inicial */
     }
 
@@ -580,7 +584,7 @@
       position: absolute;
       left: var(--tl-inset, 1.5rem);
       right: var(--tl-inset, 1.5rem);
-      top: calc(1.25rem + 38px);
+      top: calc(var(--tl-pad-top) + 38px);
       height: 2px;
       background: linear-gradient(to right, rgba(236, 217, 37, .06), rgba(236, 217, 37, .55) 4%, rgba(236, 217, 37, .55) 96%, rgba(236, 217, 37, .06));
     }
@@ -959,43 +963,115 @@
 
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, min(350px, 48vh)));
+      grid-template-columns: repeat(3, minmax(0, 350px));
       justify-content: center;
-      gap: clamp(1rem, 2.2vw, 1.75rem);
+      gap: clamp(1.25rem, 2.6vw, 2.25rem);
       margin-top: clamp(1.5rem, 3.5vh, 2.5rem);
     }
 
-    .member-card {
+    /* Cada tarjeta entra como un banderín: aparece la barra de la que cuelga
+       y la tela se desenrolla hacia abajo con el rodillo.
+       El estado base es el final, así que sin animación todo se ve completo. */
+    .member-banner {
+      --t: calc(.5s + var(--i) * .3s);
       position: relative;
+      transition: translate .35s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .member-banner:hover {
+      translate: 0 -4px;
+    }
+
+    /* barra de la que cuelga */
+    .member-banner::before {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      top: -5px;
+      left: -8px;
+      right: -8px;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(180deg, var(--signal-soft), var(--signal) 45%, #9c8f10);
+      box-shadow: 0 4px 10px -4px rgba(0, 0, 0, .6);
+    }
+
+    /* rodillo: baja mientras la tela se desenrolla y se queda como dobladillo */
+    .member-banner::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      top: 100%;
+      left: -4px;
+      right: -4px;
+      height: 14px;
+      border-radius: 7px;
+      transform: translateY(-50%);
+      background: linear-gradient(180deg, var(--signal-soft), var(--signal) 40%, #8a7d00);
+      box-shadow: 0 6px 14px -6px rgba(0, 0, 0, .7);
+    }
+
+    .member-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      aspect-ratio: 5 / 6;
-      padding: clamp(1.75rem, 4vh, 2.5rem) clamp(1.5rem, 2.4vw, 2.25rem) clamp(2rem, 4.5vh, 2.75rem);
-      border-radius: 6px;
+      padding: clamp(2.25rem, 5.5vh, 3.25rem) clamp(1.5rem, 2.4vw, 2.25rem) clamp(2.5rem, 6vh, 3.5rem);
       border: 1px solid rgba(255, 255, 255, .08);
       background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02));
       backdrop-filter: blur(6px);
-      transition: transform .35s cubic-bezier(.16, 1, .3, 1), border-color .35s ease;
-      animation: popIn .7s cubic-bezier(.16, 1, .3, 1) both;
-      animation-delay: calc(.3s + var(--i) * .12s);
+      transition: border-color .35s ease;
     }
 
-    .member-card::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 6px;
-      border-radius: 0 0 6px 6px;
-      background: var(--signal);
-    }
-
-    .member-card:hover {
+    .member-banner:hover .member-card {
       border-color: rgba(var(--glow), .35);
-      transform: translateY(-4px);
+    }
+
+    .slide.active .member-banner::before {
+      animation: rodIn .45s cubic-bezier(.16, 1, .3, 1) both;
+      animation-delay: var(--t);
+    }
+
+    .slide.active .member-banner::after {
+      animation: rodIn .45s cubic-bezier(.16, 1, .3, 1) both, rollDown 1s cubic-bezier(.45, 0, .2, 1) both;
+      animation-delay: var(--t), calc(var(--t) + .35s);
+    }
+
+    .slide.active .member-card {
+      animation: unroll 1s cubic-bezier(.45, 0, .2, 1) both;
+      animation-delay: calc(var(--t) + .35s);
+    }
+
+    .slide.active .member-card>* {
+      animation: fadeUp .6s cubic-bezier(.16, 1, .3, 1) both;
+      animation-delay: calc(var(--t) + .85s);
+    }
+
+    .slide.active .member-card>.member-role {
+      animation-delay: calc(var(--t) + .95s);
+    }
+
+    @keyframes rodIn {
+      from {
+        opacity: 0;
+        scale: 0 1;
+      }
+    }
+
+    @keyframes unroll {
+      from {
+        clip-path: inset(0 0 100% 0);
+      }
+
+      to {
+        clip-path: inset(0 0 0 0);
+      }
+    }
+
+    @keyframes rollDown {
+      from {
+        top: 0;
+      }
     }
 
     .member-name {
@@ -1015,33 +1091,6 @@
       color: var(--signal);
     }
 
-    .member-rule {
-      width: 48px;
-      height: 3px;
-      margin: clamp(1.1rem, 3vh, 1.6rem) 0;
-      border-radius: 2px;
-      background: rgba(var(--glow), .5);
-    }
-
-    .member-desc {
-      max-width: 28ch;
-      font-size: clamp(.98rem, 1.25vw, 1.08rem);
-      line-height: 1.6;
-      color: #cfcfca;
-    }
-
-    .welcome-foot {
-      margin-top: clamp(1.25rem, 3vh, 2rem);
-      font-size: .8rem;
-      letter-spacing: .25em;
-      text-transform: uppercase;
-      color: #8a8a86;
-    }
-
-    .welcome-foot strong {
-      color: var(--signal);
-    }
-
     @media (max-width:760px) {
       .stat-row {
         gap: 2rem;
@@ -1049,10 +1098,6 @@
 
       .team-grid {
         grid-template-columns: 1fr;
-      }
-
-      .member-card {
-        aspect-ratio: auto;
       }
     }
 
@@ -1062,11 +1107,6 @@
         bottom: 1.25rem;
       }
 
-      .hint {
-        display: none;
-      }
-
-      /* las flechas y el swipe ya son evidentes en móvil */
       .dots {
         bottom: 4.25rem;
       }
@@ -1103,7 +1143,7 @@
       }
 
       .tlh-track::before {
-        top: calc(1.25rem + 24px);
+        top: calc(var(--tl-pad-top) + 24px);
       }
 
       .tlh-body {
@@ -1145,6 +1185,12 @@
 
       .client-card {
         opacity: 1 !important;
+      }
+
+      /* * no alcanza a los pseudo-elementos */
+      .member-banner::before,
+      .member-banner::after {
+        animation: none !important;
       }
     }
   </style>
@@ -1234,8 +1280,8 @@
       <path d="M14 20.5h.01" />
       <path d="M17.5 20.5h3v-3" />
     </symbol>
-    <symbol id="i-label" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-      stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="i-label" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+      stroke-linejoin="round">
       <rect x="3.5" y="5" width="17" height="14" rx="1.5" />
       <path d="M7 9v6M9.5 9v6M12 9v6M15 9v6M17 9v6" />
     </symbol>
@@ -1253,7 +1299,7 @@
 
   <div class="deck" id="deck"></div>
 
-  <div class="brand"><img id="brandLogo" src="resources/logos/logo-blanco.png" alt="V&amp;C"></div>
+  <div class="brand"><img id="brandLogo" src="resources/logos/logo-negro.png" alt="V&amp;C"></div>
   <div class="dots" id="dots" role="tablist" aria-label="Ir a diapositiva"></div>
   <div class="nav">
     <span class="counter" id="counter">01 / 05</span>
@@ -1270,9 +1316,9 @@
     const CONFIG = {
       // ← aquí se cambian los nombres y puestos de los nuevos integrantes
       nuevosIntegrantes: [
-        { nombre: "Magalí Albarran", puesto: "Ejecutivo Técnico", frase: "Una nueva perspectiva para seguir creciendo y construyendo grandes resultados." },
-        { nombre: "Adrián Rivas", puesto: "Ejecutivo Técnico", frase: "Ideas, talento y colaboración que fortalecen nuestro trabajo en equipo." },
-        { nombre: "Diego Labastida", puesto: "Ejecutivo Técnico", frase: "Un nuevo comienzo para aprender, innovar y alcanzar objetivos en conjunto." },
+        { nombre: "Magalí Albarran", puesto: "Ejecutivo Técnico" },
+        { nombre: "Adrián Rivas", puesto: "Ejecutivo Técnico" },
+        { nombre: "Diego Labastida", puesto: "Ejecutivo Técnico" },
       ],
       nombreEquipo: "Equipo de TI e Innovación",
       empresa: "Verificación y Control UVA",
@@ -1287,7 +1333,7 @@
           { nombre: "Tablas de relación ULTA", icon: "grid", fecha: "oct 2025" },
           { nombre: "Bases de etiquetado ULTA", icon: "database", fecha: "oct 2025" },
           { nombre: "Escaneo ULTA", icon: "camera", fecha: "oct 2025" },
-          { nombre: "Generador de documentos VyC", icon: "doc", fecha: "nov 2025" },
+          { nombre: "Generador de documentos V&C", icon: "doc", fecha: "nov 2025" },
           { nombre: "Sistema de emisión de etiquetado", icon: "flow", fecha: "12 nov 2025" },
           { nombre: "SEA", icon: "layers", fecha: "27 mar 2026" },
           { nombre: "Extractor de pedimentos", icon: "tag", fecha: "29 jun 2026" },
@@ -1328,11 +1374,11 @@
    </div>`).join("");
 
     const membersHTML = CONFIG.nuevosIntegrantes.map((m, i) =>
-      `<div class="member-card" style="--i:${i}">
-     <div class="member-name">${m.nombre}</div>
-     <div class="member-role">${m.puesto}</div>
-     <span class="member-rule"></span>
-     <p class="member-desc">${m.frase}</p>
+      `<div class="member-banner" style="--i:${i}">
+     <div class="member-card">
+       <div class="member-name">${m.nombre}</div>
+       <div class="member-role">${m.puesto}</div>
+     </div>
    </div>`).join("");
 
     const meshBig = `<div class="mesh-layer" aria-hidden="true">
@@ -1353,24 +1399,22 @@
 
     const slides = [
       // 1 · Bienvenida
-      `${meshBig}
+      `${meshLight}
    <div class="wrap">
      <div class="keyline glow"></div>
      <div class="eyebrow">${CONFIG.nombreEquipo} · ${CONFIG.empresa}</div>
      <h1>Una nueva etapa<span class="name">comienza juntos.</span></h1>
      <p class="hero-sub">Hoy damos la bienvenida a quienes se suman al equipo para compartir ideas, crear soluciones y seguir innovando.</p>
-   </div>
-   <div class="hint">Usa las flechas &larr; &rarr; para avanzar</div>`,
+   </div>`,
 
       // 2 · Bienvenidos al equipo
       `${meshSmall}
    <div class="wrap welcome">
      <div class="keyline glow"></div>
-     <div class="eyebrow">Nuevo talento · V&amp;C</div>
+     <div class="eyebrow">Nuevo talento</div>
      <h2>¡Bienvenidos <span>al equipo!</span></h2>
-     <p class="lead">Nos alegra que formen parte de este gran equipo. Hoy iniciamos un nuevo capítulo juntos.</p>
+     <p class="lead">Nos da gusto tenerlos aquí.</p>
      <div class="team-grid">${membersHTML}</div>
-     <div class="welcome-foot">Gracias por ser parte de <strong>V&amp;C</strong></div>
    </div>`,
 
       // 3 · Quiénes somos
@@ -1422,7 +1466,7 @@
    </div>`,
     ];
 
-    const themes = ["dark", "dark", "light", "dark", "light", "dark"];
+    const themes = ["light", "dark", "light", "dark", "light", "dark"];
     const ORIGEN_INDEX = 3;
     const CLIENTS_INDEX = 4;
 
@@ -1443,11 +1487,17 @@
     const nextBtn = document.getElementById("next");
     const progressEl = document.getElementById("progress");
 
-    /* --- Fondo animado: partículas que se conectan, solo en slides oscuras - */
+    /* --- Fondo animado: partículas que se conectan ------------------------- */
     const REDUCE_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const bgCanvas = document.createElement("canvas");
     let ctx = null, particles = [], raf = null;
     const mouse = { x: -9999, y: -9999 };
+    // Sobre blanco el amarillo se pierde, así que ahí se usa un dorado más oscuro
+    const CANVAS_INK = {
+      dark: { rgb: "236,217,37", line: .22, dot: .65 },
+      light: { rgb: "138,125,0", line: .32, dot: .6 },
+    };
+    let ink = CANVAS_INK.dark;
 
     function sizeCanvas() {
       if (!bgCanvas.parentElement) return;
@@ -1485,18 +1535,19 @@
           const a = particles[i], b = particles[j];
           const dist = Math.hypot(a.x - b.x, a.y - b.y);
           if (dist < 130) {
-            ctx.strokeStyle = `rgba(236,217,37,${(1 - dist / 130) * .22})`;
+            ctx.strokeStyle = `rgba(${ink.rgb},${(1 - dist / 130) * ink.line})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           }
         }
       }
-      ctx.fillStyle = "rgba(236,217,37,.65)";
+      ctx.fillStyle = `rgba(${ink.rgb},${ink.dot})`;
       for (const p of particles) { ctx.beginPath(); ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2); ctx.fill(); }
       raf = requestAnimationFrame(tick);
     }
-    function mountCanvasInto(layer) {
+    function mountCanvasInto(layer, theme) {
       if (!layer || REDUCE_MOTION) return;
+      ink = CANVAS_INK[theme];
       if (bgCanvas.parentElement !== layer) layer.appendChild(bgCanvas);
       requestAnimationFrame(sizeCanvas);
       if (!raf) raf = requestAnimationFrame(tick);
@@ -1515,7 +1566,7 @@
       else if (bgCanvas.parentElement && !raf) raf = requestAnimationFrame(tick);
     });
 
-    /* --- Halo que sigue el cursor (solo visible sobre slides oscuras) ------ */
+    /* --- Halo que sigue el cursor ------------------------------------------ */
     const spotlight = document.getElementById("spotlight");
     document.addEventListener("mousemove", e => {
       spotlight.style.setProperty("--mx", e.clientX + "px");
@@ -1804,8 +1855,7 @@
       document.body.classList.toggle("theme-dark", themes[cur] === "dark");
       document.body.classList.toggle("theme-light", themes[cur] !== "dark");
 
-      if (themes[cur] === "dark") mountCanvasInto(sections[cur].querySelector(".mesh-layer"));
-      else unmountLoop();
+      mountCanvasInto(sections[cur].querySelector(".mesh-layer"), themes[cur]);
 
       if (cur === ORIGEN_INDEX) { runStats(); resetTlAuto(); }
       else { stopTlAuto(); }
